@@ -1,0 +1,117 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espacer</title>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 115 115%22><text y=%22.9em%22 font-size=%2290%22>📏</text></svg>">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+    <style>
+        .flex {
+            display: flex;
+        }
+
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+
+        .justify-around {
+            justify-content: space-around;
+        }
+
+        #details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em 0.1em;
+        }
+
+        #details>.item {
+            border: solid 2px var(--background);
+            padding: 0.5em;
+
+
+            background-color: grey;
+            background: repeating-linear-gradient(-45deg, #444cf722, #444cf722 5px, #e5e5f722 5px, #e5e5f722 25px);
+        }
+
+        #details>.gap {
+            border: dotted 2px grey;
+            padding: 0.5em;
+        }
+
+        #details>div {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>📏 Espacer</h1>
+    </header>
+    <main>
+        <div class="flex flex-wrap justify-around">
+            <label for="totalWidth">
+                Total width:<input type="number" id="totalWidth" value="780" min="1"></label>
+            <label for="itemWidth">
+                Item's width:<input type="number" id="itemWidth" value="23" min="1"></label>
+            <label for="itemCount">
+                Item's count:<input type="number" id="itemCount" value="5" min="1"></label>
+        </div>
+
+        <hr>
+        <div id="output"></div>
+        <br>
+        <div id="details"></div>
+    </main>
+    <footer>
+        made with love by @aloisdg
+    </footer>
+
+    <script>
+        const $ = document.querySelector.bind(document)
+        const $$ = document.querySelectorAll.bind(document)
+
+        const range = (n) => [...Array(n).keys()];
+
+        const update = () => {
+            const totalWidth = parseInt($('#totalWidth').value);
+            const itemWidth = parseInt($('#itemWidth').value);
+            const itemCount = parseInt($('#itemCount').value);
+
+            if (itemCount < 1) {
+                return;
+            }
+
+            const totalItemWidth = itemWidth * itemCount;
+
+            if (totalItemWidth > totalWidth) {
+                return;
+            }
+
+            const itemCenter = parseFloat((itemWidth / 2).toFixed(1));
+
+            const gap = Math.round((totalWidth - totalItemWidth) / (itemCount + 1));
+
+            const gapBlock = `<div class="gap">gap<br>(${gap}mm)</div>`;
+            const itemBlock = `<div class="item">item<br>(${itemWidth}mm)</div>`;
+
+            const items = range(itemCount);
+            const marks = items.map(i => gap * (i + 1) + itemWidth * i + itemCenter);
+
+
+            $('#output').innerHTML = `Write a mark every <code>${gap + itemCenter}mm</code> (i.e. ${marks.map(x => `<code>${x}mm</code>`).join(", ")})&nbsp;:`;
+            $('#details').innerHTML = gapBlock + items.map(_ => itemBlock).join(gapBlock) + gapBlock;
+        }
+
+        update();
+
+        $$('input').forEach(input => input.onchange = update);
+
+    </script>
+</body>
+
+</html>
