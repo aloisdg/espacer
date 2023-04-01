@@ -10,6 +10,10 @@
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 115 115%22><text y=%22.9em%22 font-size=%2290%22>📏</text></svg>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         .flex {
             display: flex;
         }
@@ -22,16 +26,34 @@
             justify-content: space-around;
         }
 
+        .grid {
+            display: grid;
+        }
+
+        .col-4 {
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+        }
+
+        .gap {
+            gap: 0 1em;
+        }
+
+        .w-full {
+            width: 100%;
+        }
+
+        @media screen and (width < 510px) {
+            .col-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
         #details {
-            display: flex;
-            flex-wrap: wrap;
             gap: 0.5em 0.1em;
         }
 
         #details>.item {
-            border: solid 2px var(--background);
             padding: 0.5em;
-
 
             background-color: grey;
             background: repeating-linear-gradient(-45deg, #444cf722, #444cf722 5px, #e5e5f722 5px, #e5e5f722 25px);
@@ -39,6 +61,8 @@
 
         #details>.gap {
             border: dotted 2px grey;
+            border-left: 0;
+            border-right: 0;
             padding: 0.5em;
         }
 
@@ -53,19 +77,25 @@
         <h1>📏 Espacer</h1>
     </header>
     <main>
-        <div class="flex flex-wrap justify-around">
+        <div class="grid col-4 gap">
             <label for="totalWidth">
-                Total width:<input type="number" id="totalWidth" value="780" min="1"></label>
+                Total width:<input class="w-full" type="number" id="totalWidth" value="780" min="1"></label>
             <label for="itemWidth">
-                Item's width:<input type="number" id="itemWidth" value="23" min="1"></label>
+                Item's width:<input class="w-full" type="number" id="itemWidth" value="23" min="1"></label>
             <label for="itemCount">
-                Item's count:<input type="number" id="itemCount" value="5" min="1"></label>
+                Item's count:<input class="w-full" type="number" id="itemCount" value="5" min="1"></label>
+            <label for="format">Format:
+                <select id="format" class="w-full">
+                    <option>Space around</option>
+                    <option>Space between</option>
+                </select>
+            </label>
         </div>
 
         <hr>
         <div id="output"></div>
         <br>
-        <div id="details"></div>
+        <div id="details" class="flex flex-wrap"></div>
     </main>
     <footer>
         made with love by @aloisdg
@@ -81,6 +111,7 @@
             const totalWidth = parseInt($('#totalWidth').value);
             const itemWidth = parseInt($('#itemWidth').value);
             const itemCount = parseInt($('#itemCount').value);
+            const hasMargin = !Boolean($('#format').selectedIndex);
 
             if (itemCount < 1) {
                 return;
@@ -94,23 +125,24 @@
 
             const itemCenter = parseFloat((itemWidth / 2).toFixed(1));
 
-            const gap = Math.round((totalWidth - totalItemWidth) / (itemCount + 1));
+            const gapCount = hasMargin ? itemCount + 1 : (itemCount - 1);
+            const gap = Math.round((totalWidth - totalItemWidth) / gapCount);
 
-            const gapBlock = `<div class="gap">gap<br>(${gap}mm)</div>`;
-            const itemBlock = `<div class="item">item<br>(${itemWidth}mm)</div>`;
+            const gapBlock = `<div class="gap">gap<br><small>(${gap}mm)</small></div>`;
+            const itemBlock = `<div class="item">item<br><small>(${itemWidth}mm)</small></div>`;
 
             const items = range(itemCount);
             const marks = items.map(i => gap * (i + 1) + itemWidth * i + itemCenter);
 
+            const content = items.map(_ => itemBlock).join(gapBlock);
 
             $('#output').innerHTML = `Write a mark every <code>${gap + itemCenter}mm</code> (i.e. ${marks.map(x => `<code>${x}mm</code>`).join(", ")})&nbsp;:`;
-            $('#details').innerHTML = gapBlock + items.map(_ => itemBlock).join(gapBlock) + gapBlock;
+            $('#details').innerHTML = hasMargin ? gapBlock + content + gapBlock : content;
         }
 
         update();
 
-        $$('input').forEach(input => input.onchange = update);
-
+        $$('input, select').forEach(input => input.onchange = update);
     </script>
 </body>
 
