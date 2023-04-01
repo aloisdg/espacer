@@ -34,6 +34,10 @@
             grid-template-columns: 1fr 1fr 1fr 1fr;
         }
 
+        .row-2 {
+            grid-template-rows: 1fr 1fr;
+        }
+
         .gap {
             gap: 0 1em;
         }
@@ -53,21 +57,28 @@
         }
 
         #details>.item {
-            padding: 0.5em;
-
             background-color: grey;
             background: repeating-linear-gradient(-45deg, #444cf722, #444cf722 5px, #e5e5f722 5px, #e5e5f722 25px);
+        }
+
+
+        #details>.margin {
+            border: dotted 2px grey;
+            border-left: 0;
+            border-right: 0;
+            background-color: grey;
+            background: repeating-linear-gradient(-45deg, #f7444c22, #f7444c22 5px, #e5e5f722 5px, #e5e5f722 25px);
         }
 
         #details>.gap {
             border: dotted 2px grey;
             border-left: 0;
             border-right: 0;
-            padding: 0.5em;
         }
 
         #details>div {
             text-align: center;
+            padding: 0.5em;
         }
     </style>
 </head>
@@ -77,7 +88,7 @@
         <h1>📏 Espacer</h1>
     </header>
     <main>
-        <div class="grid col-4 gap">
+        <div class="grid col-4 row-2 gap">
             <label for="totalWidth">
                 Total width:<input class="w-full" type="number" id="totalWidth" value="780" min="1"></label>
             <label for="itemWidth">
@@ -90,6 +101,8 @@
                     <option>Space between</option>
                 </select>
             </label>
+            <label for="extraMargin">
+                Extra margin:<input class="w-full" type="number" id="extraMargin" value="60" min="0"></label>
         </div>
 
         <hr>
@@ -112,6 +125,7 @@
             const itemWidth = parseInt($('#itemWidth').value);
             const itemCount = parseInt($('#itemCount').value);
             const hasMargin = !Boolean($('#format').selectedIndex);
+            const extraMargin = parseInt($('#extraMargin').value);
 
             if (itemCount < 1) {
                 return;
@@ -119,24 +133,27 @@
 
             const totalItemWidth = itemWidth * itemCount;
 
-            if (totalItemWidth > totalWidth) {
+            if (totalItemWidth > (totalWidth - extraMargin * 2)) {
                 return;
             }
 
             const itemCenter = parseFloat((itemWidth / 2).toFixed(1));
             const gapCount = hasMargin ? itemCount + 1 : (itemCount - 1);
-            const gap = Math.round((totalWidth - totalItemWidth) / gapCount);
+            const gap = Math.round((totalWidth - extraMargin * 2 - totalItemWidth) / gapCount);
 
             const gapBlock = `<div class="gap">gap<br><small>(${gap}mm)</small></div>`;
+            const marginBlock = `<div class="margin">margin<br><small>(${extraMargin}mm)</small></div>`;
             const itemBlock = `<div class="item">item<br><small>(${itemWidth}mm)</small></div>`;
 
             const items = range(itemCount);
-            const marks = items.map(i => (gap + itemWidth) * i + itemCenter + (hasMargin ? gap : 0));
+            const marks = items.map(i => extraMargin + (gap + itemWidth) * i + itemCenter + (hasMargin ? gap : 0));
 
             const content = items.map(_ => itemBlock).join(gapBlock);
 
             $('#output').innerHTML = `Write a mark every <code>${gap + itemCenter}mm</code> (i.e. ${marks.map(x => `<code>${x}mm</code>`).join(", ")})&nbsp;:`;
-            $('#details').innerHTML = hasMargin ? gapBlock + content + gapBlock : content;
+            const innerContent = hasMargin ? gapBlock + content + gapBlock : content;
+
+            $('#details').innerHTML = extraMargin > 0 ? marginBlock + innerContent + marginBlock : innerContent;
         }
 
         update();
