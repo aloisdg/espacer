@@ -124,7 +124,6 @@
             }
 
             const itemCenter = parseFloat((itemWidth / 2).toFixed(1));
-
             const gapCount = hasMargin ? itemCount + 1 : (itemCount - 1);
             const gap = Math.round((totalWidth - totalItemWidth) / gapCount);
 
@@ -132,7 +131,7 @@
             const itemBlock = `<div class="item">item<br><small>(${itemWidth}mm)</small></div>`;
 
             const items = range(itemCount);
-            const marks = items.map(i => gap * (i + 1) + itemWidth * i + itemCenter);
+            const marks = items.map(i => (gap + itemWidth) * i + itemCenter + (hasMargin ? gap : 0));
 
             const content = items.map(_ => itemBlock).join(gapBlock);
 
