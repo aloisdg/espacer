@@ -90,9 +90,9 @@
     <main>
         <div class="grid col-4 row-2 gap">
             <label for="totalWidth">
-                Total width:<input class="w-full" type="number" id="totalWidth" value="780" min="1"></label>
+                Total width (mm):<input class="w-full" type="number" id="totalWidth" value="780" min="1"></label>
             <label for="itemWidth">
-                Item's width:<input class="w-full" type="number" id="itemWidth" value="23" min="1"></label>
+                Item's width (mm):<input class="w-full" type="number" id="itemWidth" value="23" min="1"></label>
             <label for="itemCount">
                 Item's count:<input class="w-full" type="number" id="itemCount" value="5" min="1"></label>
             <label for="format">Format:
@@ -102,7 +102,14 @@
                 </select>
             </label>
             <label for="extraMargin">
-                Extra margin:<input class="w-full" type="number" id="extraMargin" value="60" min="0"></label>
+                Extra margin (mm):<input class="w-full" type="number" id="extraMargin" value="60" min="0"></label>
+
+            <label for="unit">Output unit:
+                <select id="unit" class="w-full">
+                    <option>mm</option>
+                    <option>cm</option>
+                </select>
+            </label>
         </div>
 
         <hr>
@@ -120,11 +127,19 @@
 
         const range = (n) => [...Array(n).keys()];
 
+        const humanizeUnit = (value, unit) => {
+            if (unit === "cm") {
+                return Math.round(value / 10) + " " + unit;
+            }
+            return Math.round(value) + " " + unit;
+        } 
+
         const update = () => {
             const totalWidth = parseInt($('#totalWidth').value);
             const itemWidth = parseInt($('#itemWidth').value);
             const itemCount = parseInt($('#itemCount').value);
             const hasMargin = !Boolean($('#format').selectedIndex);
+            const unit = $('#unit').value;
             const extraMargin = parseInt($('#extraMargin').value);
 
             if (itemCount < 1) {
@@ -137,22 +152,22 @@
                 return;
             }
 
-            const itemCenter = parseFloat((itemWidth / 2).toFixed(1));
+            const itemCenter = itemWidth / 2;
             const gapCount = hasMargin ? itemCount + 1 : (itemCount - 1);
-            const gap = Math.round((totalWidth - extraMargin * 2 - totalItemWidth) / gapCount);
+            const gap = (totalWidth - extraMargin * 2 - totalItemWidth) / gapCount;
 
-            const gapBlock = `<div class="gap">gap<br><small>(${gap}mm)</small></div>`;
-            const marginBlock = `<div class="margin">margin<br><small>(${extraMargin}mm)</small></div>`;
+            const gapBlock = `<div class="gap">gap<br><small>(${humanizeUnit(gap, unit)})</small></div>`;
+            const marginBlock = `<div class="margin">margin<br><small>(${humanizeUnit(extraMargin, unit)})</small></div>`;
             const itemBlock = `<div class="item">item<br><small>(${itemWidth}mm)</small></div>`;
 
             const items = range(itemCount);
-            const marks = items.map(i => extraMargin + (gap + itemWidth) * i + itemCenter + (hasMargin ? gap : 0));
+            const dots = items.map(i => extraMargin + (gap + itemWidth) * i + itemCenter + (hasMargin ? gap : 0));
 
             const content = items.map(_ => itemBlock).join(gapBlock);
 
-            $('#output').innerHTML = `Write a mark every <code>${gap + itemCenter}mm</code> (i.e. ${marks.map(x => `<code>${x}mm</code>`).join(", ")})&nbsp;:`;
-            const innerContent = hasMargin ? gapBlock + content + gapBlock : content;
+            $('#output').innerHTML = `Write a dot every <code>${humanizeUnit(gap + itemCenter, unit)}</code> (i.e. ${dots.map(dot => `<code>${humanizeUnit(dot, unit)}</code>`).join(", ")})&nbsp;:`;
 
+            const innerContent = hasMargin ? gapBlock + content + gapBlock : content;
             $('#details').innerHTML = extraMargin > 0 ? marginBlock + innerContent + marginBlock : innerContent;
         }
 
